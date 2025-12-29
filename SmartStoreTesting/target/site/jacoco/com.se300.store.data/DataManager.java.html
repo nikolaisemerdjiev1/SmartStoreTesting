@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">final</a> &gt; <a href="index.source.html" class="el_package">com.se300.store.data</a> &gt; <span class="el_source">DataManager.java</span></div><h1>DataManager.java</h1><pre class="source lang-java linenums">package com.se300.store.data;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Data Manager simulates Persistence Storage, use this class as a placeholder
+ * for persistence layer
+ *
+ * @author Sergey L. Sundukovskiy
+ * @version 1.0
+ * @since 2025-11-06
+ */
+public class DataManager {
+
+    // Singleton instance
+    private static volatile DataManager instance;
+
+    // &quot;Fake database&quot; – shared in-memory map
+    private final Map&lt;String, Object&gt; store;
+
+    /**
+     * Private constructor so only getInstance() can create it.
+     */
+<span class="fc" id="L26">    private DataManager() {</span>
+<span class="fc" id="L27">        this.store = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="fc" id="L28">    }</span>
+
+    /**
+     * Get singleton instance of DataManager.
+     * This makes the data &quot;persist&quot; for the lifetime of the JVM.
+     */
+    public static DataManager getInstance() {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L36">            synchronized (DataManager.class) {</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">                if (instance == null) {</span>
+<span class="fc" id="L38">                    instance = new DataManager();</span>
+                }
+<span class="fc" id="L40">            }</span>
+        }
+<span class="fc" id="L42">        return instance;</span>
+    }
+
+    /**
+     * Put a value into the store.
+     *
+     * @param key   storage key
+     * @param value value to store
+     */
+    public &lt;T&gt; void put(String key, T value) {
+<span class="fc" id="L52">        store.put(key, value);</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * Get a value from the store.
+     *
+     * @param key storage key
+     * @param &lt;T&gt; expected type
+     * @return value or null
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;T&gt; T get(String key) {
+<span class="fc" id="L64">        return (T) store.get(key);</span>
+    }
+
+    /**
+     * Check if key exists.
+     */
+    public boolean containsKey(String key) {
+<span class="fc" id="L71">        return store.containsKey(key);</span>
+    }
+
+    /**
+     * Remove a key/value pair.
+     *
+     * @param key storage key
+     * @param &lt;T&gt; value type
+     * @return removed value or null
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;T&gt; T remove(String key) {
+<span class="nc" id="L83">        return (T) store.remove(key);</span>
+    }
+
+    /**
+     * Remove all entries.
+     */
+    public void clear() {
+<span class="fc" id="L90">        store.clear();</span>
+<span class="fc" id="L91">    }</span>
+
+    /**
+     * Get all keys.
+     */
+    public Set&lt;String&gt; keys() {
+<span class="fc" id="L97">        return store.keySet();</span>
+    }
+
+    /**
+     * Number of entries.
+     */
+    public int size() {
+<span class="fc" id="L104">        return store.size();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

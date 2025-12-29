@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StoreRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">final</a> &gt; <a href="index.source.html" class="el_package">com.se300.store.repository</a> &gt; <span class="el_source">StoreRepository.java</span></div><h1>StoreRepository.java</h1><pre class="source lang-java linenums">package com.se300.store.repository;
+
+import com.se300.store.data.DataManager;
+import com.se300.store.model.Store;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * Store Repository represents the store data access layer
+ *
+ * @author Sergey L. Sundukovskiy
+ * @version 1.0
+ * @since 2025-11-06
+ */
+public class StoreRepository {
+
+    private static final String STORES_KEY = &quot;stores&quot;;
+    private final DataManager dataManager;
+
+<span class="fc" id="L22">    public StoreRepository(DataManager dataManager) {</span>
+<span class="fc" id="L23">        this.dataManager = dataManager;</span>
+
+        // Make sure there is always a map for stores in DataManager
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        if (!dataManager.containsKey(STORES_KEY)) {</span>
+<span class="fc" id="L27">            dataManager.put(STORES_KEY, new HashMap&lt;String, Store&gt;());</span>
+        }
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * Find store by ID.
+     *
+     * @param storeId ID of the store
+     * @return Optional containing the store if found, otherwise empty
+     */
+    public Optional&lt;Store&gt; findById(String storeId) {
+<span class="fc" id="L38">        Map&lt;String, Store&gt; stores = getStoresMap();</span>
+<span class="fc" id="L39">        return Optional.ofNullable(stores.get(storeId));</span>
+    }
+
+    /**
+     * Save or update a store.
+     *
+     * @param store store entity to persist
+     */
+    public void save(Store store) {
+<span class="fc" id="L48">        Map&lt;String, Store&gt; stores = getStoresMap();</span>
+<span class="fc" id="L49">        stores.put(store.getId(), store);</span>
+<span class="fc" id="L50">        dataManager.put(STORES_KEY, stores);</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * Check if a store exists by ID.
+     *
+     * @param storeId ID of the store
+     * @return true if store exists, false otherwise
+     */
+    public boolean existsById(String storeId) {
+<span class="fc" id="L60">        Map&lt;String, Store&gt; stores = getStoresMap();</span>
+<span class="fc" id="L61">        return stores.containsKey(storeId);</span>
+    }
+
+    /**
+     * Delete a store by ID.
+     *
+     * @param storeId ID of the store to delete
+     */
+    public void delete(String storeId) {
+<span class="fc" id="L70">        Map&lt;String, Store&gt; stores = getStoresMap();</span>
+<span class="fc" id="L71">        stores.remove(storeId);</span>
+<span class="fc" id="L72">        dataManager.put(STORES_KEY, stores);</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Get all stores.
+     *
+     * @return copy of all stores keyed by store ID
+     */
+    public Map&lt;String, Store&gt; findAll() {
+<span class="fc" id="L81">        return new HashMap&lt;&gt;(getStoresMap());</span>
+    }
+
+    /**
+     * Helper method to get the stores map from DataManager.
+     * Lazily initializes the map if it does not already exist.
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private Map&lt;String, Store&gt; getStoresMap() {
+<span class="fc" id="L90">        Map&lt;String, Store&gt; stores = dataManager.get(STORES_KEY);</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (stores == null) {</span>
+<span class="fc" id="L92">            stores = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L93">            dataManager.put(STORES_KEY, stores);</span>
+        }
+<span class="fc" id="L95">        return stores;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

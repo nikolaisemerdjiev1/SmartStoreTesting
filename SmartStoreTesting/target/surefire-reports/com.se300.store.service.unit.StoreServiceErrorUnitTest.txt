@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.se300.store.service.unit.StoreServiceErrorUnitTest
+-------------------------------------------------------------------------------
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in com.se300.store.service.unit.StoreServiceErrorUnitTest

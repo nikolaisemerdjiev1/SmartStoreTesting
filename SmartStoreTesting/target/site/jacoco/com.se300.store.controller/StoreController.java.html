@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StoreController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">final</a> &gt; <a href="index.source.html" class="el_package">com.se300.store.controller</a> &gt; <span class="el_source">StoreController.java</span></div><h1>StoreController.java</h1><pre class="source lang-java linenums">package com.se300.store.controller;
+
+import com.se300.store.model.Store;
+import com.se300.store.model.StoreException;
+import com.se300.store.service.StoreService;
+import com.se300.store.servlet.BaseServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
+import java.util.Collection;
+
+/**
+ * REST API controller for Store operations
+ * Implements full CRUD operations.
+ *
+ * Endpoints:
+ * GET /api/v1/stores -&gt; list all stores
+ * GET /api/v1/stores/{storeId} -&gt; get single store
+ * POST /api/v1/stores -&gt; create store
+ * PUT /api/v1/stores/{storeId} -&gt; update store
+ * DELETE /api/v1/stores/{storeId} -&gt; delete store
+ */
+public class StoreController extends BaseServlet {
+
+    private final StoreService storeService;
+
+<span class="fc" id="L28">    public StoreController(StoreService storeService) {</span>
+<span class="fc" id="L29">        this.storeService = storeService;</span>
+<span class="fc" id="L30">    }</span>
+
+    /**
+     * Handle GET requests.
+     * - GET /api/v1/stores -&gt; all stores
+     * - GET /api/v1/stores/{storeId} -&gt; single store
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+<span class="fc" id="L40">            String storeId = extractResourceId(request);</span>
+
+<span class="pc bpc" id="L42" title="1 of 4 branches missed.">            if (storeId == null || storeId.isBlank()) {</span>
+                // List all stores
+<span class="fc" id="L44">                Collection&lt;Store&gt; stores = storeService.getAllStores();</span>
+<span class="fc" id="L45">                sendJsonResponse(response, stores, HttpServletResponse.SC_OK);</span>
+<span class="fc" id="L46">            } else {</span>
+                // Get single store
+<span class="fc" id="L48">                Store store = storeService.showStore(storeId, null); // token not used, pass null</span>
+<span class="fc" id="L49">                sendJsonResponse(response, store, HttpServletResponse.SC_OK);</span>
+            }
+<span class="fc" id="L51">        } catch (StoreException e) {</span>
+            // Store not found or other business error
+<span class="fc" id="L53">            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, e.getMessage());</span>
+<span class="fc" id="L54">        } catch (Exception e) {</span>
+            // Unexpected error
+<span class="fc" id="L56">            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,</span>
+<span class="fc" id="L57">                    &quot;Unexpected error: &quot; + e.getMessage());</span>
+<span class="fc" id="L58">        }</span>
+<span class="fc" id="L59">    }</span>
+
+    /**
+     * Handle POST requests - Create new store
+     * POST /api/v1/stores?storeId=xxx&amp;description=xxx&amp;address=xxx
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+<span class="fc" id="L67">        String storeId = request.getParameter(&quot;storeId&quot;);</span>
+<span class="fc" id="L68">        String description = request.getParameter(&quot;description&quot;);</span>
+<span class="fc" id="L69">        String address = request.getParameter(&quot;address&quot;);</span>
+
+<span class="pc bpc" id="L71" title="1 of 6 branches missed.">        if (storeId == null || description == null || address == null) {</span>
+<span class="fc" id="L72">            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,</span>
+                    &quot;Missing required parameters: storeId, description, address&quot;);
+<span class="fc" id="L74">            return;</span>
+        }
+
+        try {
+            // In StoreService, the second arg is called &quot;name&quot; but logically it’s the
+            // description
+<span class="fc" id="L80">            Store store = storeService.provisionStore(storeId, description, address, null);</span>
+<span class="fc" id="L81">            sendJsonResponse(response, store, HttpServletResponse.SC_CREATED);</span>
+<span class="fc" id="L82">        } catch (StoreException e) {</span>
+            // e.g., &quot;Store Already Exists&quot;
+<span class="fc" id="L84">            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, e.getMessage());</span>
+<span class="fc" id="L85">        } catch (Exception e) {</span>
+<span class="fc" id="L86">            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,</span>
+<span class="fc" id="L87">                    &quot;Unexpected error: &quot; + e.getMessage());</span>
+<span class="fc" id="L88">        }</span>
+<span class="fc" id="L89">    }</span>
+
+    /**
+     * Handle PUT requests - Update existing store
+     * PUT /api/v1/stores/{storeId}?description=xxx&amp;address=xxx
+     */
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
+<span class="fc" id="L97">        String storeId = extractResourceId(request);</span>
+<span class="pc bpc" id="L98" title="1 of 4 branches missed.">        if (storeId == null || storeId.isBlank()) {</span>
+<span class="fc" id="L99">            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,</span>
+                    &quot;Store ID is required in path: /api/v1/stores/{storeId}&quot;);
+<span class="fc" id="L101">            return;</span>
+        }
+
+<span class="fc" id="L104">        String description = request.getParameter(&quot;description&quot;);</span>
+<span class="fc" id="L105">        String address = request.getParameter(&quot;address&quot;);</span>
+
+<span class="pc bpc" id="L107" title="1 of 4 branches missed.">        if (description == null &amp;&amp; address == null) {</span>
+<span class="fc" id="L108">            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,</span>
+                    &quot;At least one of description or address must be provided&quot;);
+<span class="fc" id="L110">            return;</span>
+        }
+
+        try {
+<span class="fc" id="L114">            Store updated = storeService.updateStore(storeId, description, address);</span>
+<span class="fc" id="L115">            sendJsonResponse(response, updated, HttpServletResponse.SC_OK);</span>
+<span class="fc" id="L116">        } catch (StoreException e) {</span>
+<span class="fc" id="L117">            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, e.getMessage());</span>
+<span class="fc" id="L118">        } catch (Exception e) {</span>
+<span class="fc" id="L119">            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,</span>
+<span class="fc" id="L120">                    &quot;Unexpected error: &quot; + e.getMessage());</span>
+<span class="fc" id="L121">        }</span>
+<span class="fc" id="L122">    }</span>
+
+    /**
+     * Handle DELETE requests - Delete store
+     * DELETE /api/v1/stores/{storeId}
+     */
+    @Override
+    protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+<span class="fc" id="L130">        String storeId = extractResourceId(request);</span>
+<span class="pc bpc" id="L131" title="1 of 4 branches missed.">        if (storeId == null || storeId.isBlank()) {</span>
+<span class="fc" id="L132">            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST,</span>
+                    &quot;Store ID is required in path: /api/v1/stores/{storeId}&quot;);
+<span class="fc" id="L134">            return;</span>
+        }
+
+        try {
+<span class="fc" id="L138">            storeService.deleteStore(storeId);</span>
+            // No body, just 204
+<span class="fc" id="L140">            response.setStatus(HttpServletResponse.SC_NO_CONTENT);</span>
+<span class="fc" id="L141">        } catch (StoreException e) {</span>
+<span class="fc" id="L142">            sendErrorResponse(response, HttpServletResponse.SC_NOT_FOUND, e.getMessage());</span>
+<span class="fc" id="L143">        } catch (Exception e) {</span>
+<span class="fc" id="L144">            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,</span>
+<span class="fc" id="L145">                    &quot;Unexpected error: &quot; + e.getMessage());</span>
+<span class="fc" id="L146">        }</span>
+<span class="fc" id="L147">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
